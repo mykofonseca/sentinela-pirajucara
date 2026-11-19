@@ -1,0 +1,322 @@
+{
+  "version": 1,
+  "author": "Gustavo Franzoti Gonçalves e Maykon Santana Fonseca",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp",
+      "top": 0,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-hc-sr04",
+      "id": "nivel",
+      "top": -210,
+      "left": -260,
+      "attrs": {
+        "distance": "400"
+      }
+    },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht",
+      "top": -220,
+      "left": 40,
+      "attrs": {
+        "temperature": "24",
+        "humidity": "78"
+      }
+    },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "chuva",
+      "top": -200,
+      "left": 180,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn",
+      "top": 250,
+      "left": -250,
+      "attrs": {
+        "color": "blue",
+        "label": "Silenciar"
+      }
+    },
+    {
+      "type": "wokwi-slide-switch",
+      "id": "queda",
+      "top": 250,
+      "left": -110,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd",
+      "top": -10,
+      "left": 260,
+      "attrs": {
+        "pins": "i2c"
+      }
+    },
+    {
+      "type": "wokwi-rgb-led",
+      "id": "rgb",
+      "top": 160,
+      "left": 280,
+      "attrs": {
+        "common": "cathode"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "rR",
+      "top": 250,
+      "left": 250,
+      "rotate": 90,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "rG",
+      "top": 250,
+      "left": 280,
+      "rotate": 90,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "rB",
+      "top": 250,
+      "left": 310,
+      "rotate": 90,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-buzzer",
+      "id": "buzzer",
+      "top": 150,
+      "left": 420,
+      "attrs": {
+        "volume": "0.2"
+      }
+    },
+    {
+      "type": "wokwi-servo",
+      "id": "cancela",
+      "top": 260,
+      "left": 400,
+      "attrs": {}
+    }
+  ],
+  "connections": [
+    [
+      "esp:TX",
+      "$serialMonitor:RX",
+      "",
+      []
+    ],
+    [
+      "esp:RX",
+      "$serialMonitor:TX",
+      "",
+      []
+    ],
+    [
+      "nivel:VCC",
+      "esp:5V",
+      "red",
+      []
+    ],
+    [
+      "nivel:GND",
+      "esp:GND.1",
+      "black",
+      []
+    ],
+    [
+      "nivel:TRIG",
+      "esp:5",
+      "orange",
+      []
+    ],
+    [
+      "nivel:ECHO",
+      "esp:18",
+      "yellow",
+      []
+    ],
+    [
+      "dht:VCC",
+      "esp:3V3",
+      "red",
+      []
+    ],
+    [
+      "dht:GND",
+      "esp:GND.2",
+      "black",
+      []
+    ],
+    [
+      "dht:SDA",
+      "esp:15",
+      "green",
+      []
+    ],
+    [
+      "chuva:VCC",
+      "esp:3V3",
+      "red",
+      []
+    ],
+    [
+      "chuva:GND",
+      "esp:GND.2",
+      "black",
+      []
+    ],
+    [
+      "chuva:SIG",
+      "esp:34",
+      "purple",
+      []
+    ],
+    [
+      "btn:1.l",
+      "esp:4",
+      "blue",
+      []
+    ],
+    [
+      "btn:2.l",
+      "esp:GND.1",
+      "black",
+      []
+    ],
+    [
+      "queda:2",
+      "esp:27",
+      "gray",
+      []
+    ],
+    [
+      "queda:1",
+      "esp:GND.1",
+      "black",
+      []
+    ],
+    [
+      "queda:3",
+      "esp:3V3",
+      "red",
+      []
+    ],
+    [
+      "lcd:VCC",
+      "esp:5V",
+      "red",
+      []
+    ],
+    [
+      "lcd:GND",
+      "esp:GND.3",
+      "black",
+      []
+    ],
+    [
+      "lcd:SDA",
+      "esp:21",
+      "green",
+      []
+    ],
+    [
+      "lcd:SCL",
+      "esp:22",
+      "blue",
+      []
+    ],
+    [
+      "rgb:R",
+      "rR:1",
+      "red",
+      []
+    ],
+    [
+      "rgb:G",
+      "rG:1",
+      "green",
+      []
+    ],
+    [
+      "rgb:B",
+      "rB:1",
+      "blue",
+      []
+    ],
+    [
+      "rgb:COM",
+      "esp:GND.3",
+      "black",
+      []
+    ],
+    [
+      "rR:2",
+      "esp:25",
+      "red",
+      []
+    ],
+    [
+      "rG:2",
+      "esp:26",
+      "green",
+      []
+    ],
+    [
+      "rB:2",
+      "esp:33",
+      "blue",
+      []
+    ],
+    [
+      "buzzer:2",
+      "esp:13",
+      "orange",
+      []
+    ],
+    [
+      "buzzer:1",
+      "esp:GND.3",
+      "black",
+      []
+    ],
+    [
+      "cancela:PWM",
+      "esp:19",
+      "orange",
+      []
+    ],
+    [
+      "cancela:V+",
+      "esp:5V",
+      "red",
+      []
+    ],
+    [
+      "cancela:GND",
+      "esp:GND.3",
+      "black",
+      []
+    ]
+  ],
+  "dependencies": {}
+}
