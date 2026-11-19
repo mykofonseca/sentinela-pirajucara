@@ -303,7 +303,7 @@ def cor_token(tok):
     return None
 
 
-def codigo(doc, titulo, fonte_codigo, lexer=None):
+def codigo(doc, titulo, fonte_codigo, arquivo, lexer=None):
     legenda(doc, "codigo", titulo)
     t = doc.add_table(rows=1, cols=1)
     t.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -331,7 +331,7 @@ def codigo(doc, titulo, fonte_codigo, lexer=None):
                 if cor:
                     r.font.color.rgb = RGBColor.from_string(cor)
     f = doc.add_paragraph(style="Caption")
-    f.add_run("Fonte: Elaborado pelos autores (trecho de firmware/src/main.cpp ou firmware/include/borda.h).")
+    f.add_run(f"Fonte: Elaborado pelos autores (trecho de firmware/{arquivo}).")
     f.paragraph_format.space_before = Pt(2)
     f.paragraph_format.space_after = Pt(8)
     f.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
@@ -468,7 +468,8 @@ def conteudo(doc, links):
              "ou mais, ou a chuva passa de 50 mm/h, o nó já declara ALERTA. No CRITICO a cancela fecha mesmo "
              "que um comando remoto tenha pedido abertura, e um pedido de abertura nesse estado é recusado.")
     codigo(doc, "Classificação do nível com histerese",
-           trecho("include/borda.h", "inline Estado classificarNivel", "return static_cast<Estado>(e);") + "\n}")
+           trecho("include/borda.h", "inline Estado classificarNivel", "return static_cast<Estado>(e);") + "\n}",
+           "include/borda.h")
     par(doc, "Para reduzir tráfego, as leituras são **agregadas** em janelas de 30 s (média, mínimo e máximo) e "
              "passam por um **deadband**: em estado NORMAL a janela só é publicada se o nível variou 2 cm ou "
              "mais, ou a cada 5 min como sinal de vida. Fora do NORMAL toda janela é publicada, e mudanças de "
@@ -551,7 +552,8 @@ def conteudo(doc, links):
              "`mqtt.connect()`, limitada a 8 s pelo `setHandshakeTimeout`; durante esse tempo os atuadores "
              "mantêm o último estado, então a cancela e a sirene não mudam de comportamento.")
     codigo(doc, "Reconexão MQTT com backoff e Last Will",
-           trecho("src/main.cpp", "// Uma única tentativa por vez", "backoffMqtt = min(backoffMqtt * 2"))
+           trecho("src/main.cpp", "// Uma única tentativa por vez", "backoffMqtt = min(backoffMqtt * 2"),
+           "src/main.cpp")
     par(doc, "O Last Will é registrado na conexão no tópico `status`, retido, com `{\"status\":\"offline\"}`; ao "
              "conectar, o nó publica `online` no mesmo tópico. Para o teste, a chave deslizante derruba o Wi-Fi "
              "sem mandar DISCONNECT, como numa queda real, e o broker publica o Last Will após o keepalive de "
