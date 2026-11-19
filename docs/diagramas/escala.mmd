@@ -11,6 +11,6 @@ flowchart LR
   B1 -- "MQTT local" --> G1["Gateway fog<br/>bacia Pirajuçara"]
   B2 -- "MQTT local" --> G2["Gateway fog<br/>bacia Aricanduva"]
   B3 -- "MQTT local" --> G3["Gateways fog<br/>demais bacias"]
-  G1 & G2 & G3 -- "resumo por bacia<br/>+ eventos" --> H["HiveMQ Cloud<br/>citizentech/#"]
+  G1 & G2 & G3 -- "resumo por bacia<br/>+ eventos" --> H["Broker HiveMQ gerenciado<br/>com autenticação e ACL"]
   H --> T["Dashboard<br/>ThingSpeak / Ubidots"]
   H --> DC["Central da<br/>Defesa Civil"]

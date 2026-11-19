@@ -412,8 +412,7 @@ def conteudo(doc, links):
              "e transborda com frequência nas chuvas de verão. Quando isso acontece, a água chega às ruas "
              "transversais e às pontes estreitas que ligam os dois lados da avenida antes de qualquer aviso "
              "oficial alcançar quem está passando. Motoristas entram na via alagada, pedestres atravessam a "
-             "ponte com a água subindo e os comerciantes da margem perdem tempo que seria usado para levantar "
-             "mercadorias.")
+             "ponte com a água subindo.")
     par(doc, "O **Sentinela Pirajuçara** é um nó de borda instalado sob uma dessas pontes. Ele mede o nível da "
              "água, estima a intensidade da chuva e, sozinho, decide o nível de risco: avisa no painel LCD e no "
              "LED, toca a sirene e fecha uma cancela que bloqueia a entrada da ponte quando o nível fica crítico. "
@@ -427,8 +426,7 @@ def conteudo(doc, links):
              "evento de chuva e a redução de mensagens enviadas à nuvem (seção 8).")
     par(doc, "A decisão precisa ficar na borda porque a chuva forte é justamente o momento em que energia, "
              "Wi-Fi e rede celular costumam falhar. Fechar a cancela não pode esperar uma volta pela nuvem nem "
-             "depender de o broker estar acessível. Na borda o nó reage em segundos, continua funcionando sem "
-             "rede e envia para a nuvem só o que interessa.")
+             "depender de o broker estar acessível.")
 
     # 2 -------------------------------------------------------------
     doc.add_heading("2 Sensores, atuadores e circuito (R2)", level=1)
@@ -447,12 +445,11 @@ def conteudo(doc, links):
             ["Buzzer (saída)", "GPIO13", "Bipe no ALERTA e sirene alternada no CRITICO."],
             ["Servo (saída)", "GPIO19", "Cancela da ponte: fecha a 0° no CRITICO, aberta a 90°."]],
            [4.0, 3.0, 9.0])
-    figura(doc, IMG / "ligacoes.png", "Ligações do circuito", 13, altura_max_cm=4)
+    figura(doc, IMG / "ligacoes.png", "Ligações do circuito", 13, altura_max_cm=3.5)
     figura_opcional(doc, "wokwi_circuito", "Circuito montado no Wokwi", 14,
-                    "Captura de tela do simulador Wokwi feita pelos autores.", altura_max_cm=6)
-    par(doc, "Buzzer e servo usam canais LEDC em timers diferentes (canal 6 e canal 4) porque trabalham em "
-             "frequências diferentes; no mesmo timer, ligar a sirene mudaria a frequência do servo. Numa "
-             "montagem física o ECHO do HC-SR04 precisaria de divisor de tensão para 3,3 V.")
+                    "Captura de tela do simulador Wokwi feita pelos autores.", altura_max_cm=5.5)
+    par(doc, "Buzzer e servo usam canais LEDC em timers diferentes, senão ligar a sirene mudaria a frequência "
+             "do servo. Numa montagem física o ECHO do HC-SR04 precisaria de divisor de tensão para 3,3 V.")
 
     # 3 -------------------------------------------------------------
     doc.add_heading("3 Decisão na borda (R3)", level=1)
@@ -480,9 +477,12 @@ def conteudo(doc, links):
 
     # 4 -------------------------------------------------------------
     doc.add_heading("4 Comunicação MQTT (R4)", level=1)
-    par(doc, "O broker é o HiveMQ Cloud. A hierarquia segue `citizentech/<grupo>/<local>/<dispositivo>/<grandeza>`, "
-             "com base `citizentech/gs-gm/pirajucara-eliseu/no01/`. São sete tópicos de publicação e um de "
-             "assinatura, todos com payload JSON.")
+    par(doc, "O broker é o público da HiveMQ (`broker.hivemq.com`, porta 8883 com TLS); a seção 6 explica por "
+             "que não foi possível usar o HiveMQ Cloud. Para acompanhar as mensagens e enviar comandos usamos o "
+             "MQTT WebSocket Client da HiveMQ, que se conecta ao mesmo broker pela porta 8884. A hierarquia segue "
+             "`citizentech/<grupo>/<local>/<dispositivo>/<grandeza>`, com base "
+             "`citizentech/gs-gm/pirajucara-eliseu/no01/`. São sete tópicos de publicação e um de assinatura, "
+             "todos com payload JSON.")
     tabela(doc, "Tópicos MQTT do nó (prefixo citizentech/gs-gm/pirajucara-eliseu/no01/)",
            ["Tópico", "Sentido", "Quando", "Exemplo de payload"],
            [["nivel", "pub", "fim da janela (deadband)",
@@ -494,15 +494,15 @@ def conteudo(doc, links):
             ["status", "pub (retido, LWT)", "conexão / queda", '`{"status":"online","fw":"1.0.0","rssi":-58,"buffer_pendente":0}` ou `{"status":"offline"}`'],
             ["diagnostico", "pub", "a cada 5 min", '`{"amostras":4410,"publicadas":96,"evitadas":4290,"buffer":0,"reconexoes":2}`'],
             ["ack", "pub", "resposta a comando", '`{"acao":"cancela","ok":false,"msg":"nivel critico, abertura bloqueada"}`'],
-            ["cmd", "sub (QoS 1)", "comando remoto", '`{"acao":"cancela","modo":"fechar"}`']],
+            ["cmd", "sub (QoS 1)", "comando remoto", '`{"acao":"cancela","modo":"fechar","token":"***"}`']],
            [2.2, 2.4, 2.8, 8.6], tam=9)
     par(doc, "O tópico `cmd` aceita cinco ações que mudam o comportamento do nó: `silenciar` (desliga a sirene "
              "até o estado piorar), `cancela` com modo `auto`, `fechar` ou `abrir`, `limiares` (novos valores "
              "de atenção, alerta, crítico e histerese, validados antes de aplicar), `intervalo` (janela de "
-             "agregação entre 10 e 300 s) e `diagnostico`. Cada comando recebe resposta em `ack`, inclusive "
-             "quando é recusado.")
-    figura_opcional(doc, "hivemq_mensagens", "Mensagens do nó chegando no HiveMQ Cloud (Web Client)", 15,
-                    "Captura de tela do HiveMQ Cloud feita pelos autores.", altura_max_cm=5)
+             "agregação entre 10 e 300 s) e `diagnostico`. Todo comando precisa do campo `token` com o valor "
+             "definido em `secrets.h`, e cada um recebe resposta em `ack`, inclusive quando é recusado.")
+    figura_opcional(doc, "hivemq_mensagens", "Mensagens do nó no MQTT WebSocket Client da HiveMQ", 15,
+                    "Captura de tela do HiveMQ WebSocket Client feita pelos autores.", altura_max_cm=5)
 
     # 5 -------------------------------------------------------------
     doc.add_heading("5 Dashboard (R5)", level=1)
@@ -520,37 +520,45 @@ def conteudo(doc, links):
             ["field7 / field8", "Mensagens evitadas / ocupação do buffer", "Numeric display"]],
            [3.0, 6.0, 7.0])
     figura_opcional(doc, "dashboard_thingspeak", "Dashboard do canal no ThingSpeak", 15.5,
-                    "Captura de tela do ThingSpeak feita pelos autores.", altura_max_cm=6)
+                    "Captura de tela do ThingSpeak feita pelos autores.", altura_max_cm=5)
 
     # 6 -------------------------------------------------------------
     doc.add_heading("6 Segurança e LGPD (R6)", level=1)
-    par(doc, "A conexão com o HiveMQ Cloud usa TLS na porta 8883 e o ESP32 valida o certificado do servidor "
-             "com a CA raiz ISRG Root X1, em vez de `setInsecure()`. O acesso é feito com usuário e senha "
-             "criados só para a GS. Wi-Fi, host, usuário, senha, chave de escrita do ThingSpeak e o certificado "
-             "ficam em `include/secrets.h`, que está no `.gitignore`; o repositório traz apenas "
-             "`secrets.exemplo.h`. O Last Will também protege a operação: se o nó cair, o broker publica "
-             "`offline` e a central sabe que aquela ponte está sem monitoramento remoto.")
-    par(doc, "Os comandos remotos são validados no próprio nó. Limiares fora de ordem ou acima da altura do "
-             "sensor são recusados, o intervalo tem faixa fixa e a cancela não abre com nível crítico, então "
-             "nem um comando errado nem uma credencial vazada conseguem liberar a ponte durante a enchente. "
-             "Uma limitação conhecida é o envio ao ThingSpeak por HTTP sem TLS, aceitável aqui porque só "
-             "trafegam medições ambientais, mas a troca por HTTPS seria o próximo passo. Em produção, o usuário "
-             "do broker ficaria restrito por ACL ao prefixo `citizentech/gs-gm/#`.")
+    par(doc, "O enunciado pede HiveMQ Cloud com usuário e senha, mas, ao criarmos o cluster em 18/11/2026, "
+             "o console da HiveMQ informou que o plano gratuito Serverless foi descontinuado: não aceita novos "
+             "clusters, e os existentes deixam de aceitar conexões e são apagados em 31/12/2026, sem migração "
+             "automática. Sem esse plano, passamos a usar o broker público da HiveMQ, que não autentica "
+             "clientes. Mantivemos o que dava para manter e compensamos o resto no próprio nó.")
+    par(doc, "A conexão continua com TLS na porta 8883, e o ESP32 valida o certificado do `broker.hivemq.com` "
+             "com a CA raiz Amazon Root CA 1, em vez de usar `setInsecure()`. Assim o nó só conversa com o "
+             "servidor certo e ninguém no caminho lê ou altera as mensagens. O TLS não resolve o fato de que, "
+             "num broker aberto, qualquer cliente pode publicar nos nossos tópicos. Por isso todo comando em "
+             "`cmd` exige um token guardado em `secrets.h`: sem ele o comando é descartado, respondido em `ack` "
+             "e contado em `cmd_recusados` no diagnóstico. O token não substitui autenticação, porque pode ser lido "
+             "por quem assinar `cmd`, mas impede que um cliente qualquer mexa na cancela. Os comandos também são validados: limiares fora de "
+             "ordem são recusados, o intervalo tem faixa fixa e a cancela não abre com nível crítico, nem com "
+             "um comando forjado.")
+    par(doc, "Host, token, chave de escrita do ThingSpeak e certificado ficam em `include/secrets.h`, que está "
+             "no `.gitignore`; o repositório traz apenas `secrets.exemplo.h`. O firmware já está pronto para um "
+             "broker com autenticação: preenchendo `MQTT_USUARIO` e `MQTT_SENHA`, a conexão passa a enviar as "
+             "credenciais, e em produção esse usuário ficaria restrito por ACL a `citizentech/gs-gm/#`. Outra "
+             "limitação conhecida é o envio ao ThingSpeak por HTTP sem TLS.")
     par(doc, "Quanto à LGPD (Lei nº 13.709/2018), o nó coleta nível da água, intensidade da chuva, temperatura, "
              "umidade, estado de alerta, posição da cancela e dados técnicos do próprio equipamento (IP local, "
              "RSSI, contadores). Nenhum desses dados identifica ou torna identificável uma pessoa natural, por "
              "isso não são dados pessoais nos termos do art. 5º, I. O acionamento do botão é registrado sem "
              "qualquer identificação de quem apertou. Se o projeto evoluísse para câmera na ponte, passaria a "
              "tratar dados pessoais e precisaria de base legal (art. 7º, III, execução de políticas públicas), "
-             "aviso visível no local e retenção mínima.")
+             "aviso visível no local e retenção mínima. Isso pesa mais no broker público, onde qualquer assinante "
+             "lê o que é publicado: hoje a exposição é aceitável porque nada ali é pessoal.")
 
     # 7 -------------------------------------------------------------
     doc.add_heading("7 Estratégia de resiliência (R7)", level=1)
     par(doc, "O `loop()` nunca espera a rede. `gerenciarWifi()` chama `WiFi.begin()` e só confere o status nas "
              "voltas seguintes, repetindo a tentativa a cada 15 s. `gerenciarMqtt()` faz no máximo uma tentativa "
              "por vez, com intervalo que dobra de 2 s até 30 s. A única espera real é o handshake TLS dentro de "
-             "`mqtt.connect()`, limitada a 8 s pelo `setHandshakeTimeout`; durante esse tempo os atuadores "
-             "mantêm o último estado, então a cancela e a sirene não mudam de comportamento.")
+             "`mqtt.connect()`, limitada a 8 s pelo `setHandshakeTimeout`; nesse tempo os atuadores mantêm o "
+             "último estado.")
     codigo(doc, "Reconexão MQTT com backoff e Last Will",
            trecho("src/main.cpp", "// Uma única tentativa por vez", "backoffMqtt = min(backoffMqtt * 2"),
            "src/main.cpp")
@@ -573,9 +581,9 @@ def conteudo(doc, links):
     figura(doc, IMG / "escala.png", "Organização para 100 dispositivos com gateways fog por bacia", 11, altura_max_cm=4.6)
     par(doc, "O gateway fog (um Raspberry Pi ou mini PC por bacia, com broker local) recebe os nós por MQTT na "
              "rede da região, consolida a bacia (maior nível, quantos nós em ALERTA, tendência) e repassa à "
-             "nuvem só esse resumo e os eventos. Isso reduz as conexões no HiveMQ Cloud de 100 para 4, o que "
-             "importa porque o plano gratuito Serverless é limitado a 100 conexões, e deixa um único canal do "
-             "ThingSpeak por bacia. A Tabela 4 compara o envio de cada amostra com o envio feito pela borda.")
+             "nuvem só esse resumo e os eventos. Em produção o broker público não serve, porque não tem "
+             "autenticação nem garantia de disponibilidade; seria um broker HiveMQ gerenciado, e os gateways "
+             "reduzem as conexões nele de 100 para 4. A Tabela 4 compara o envio de cada amostra com o envio feito pela borda.")
     tabela(doc, "Estimativa de mensagens por hora (nível e chuva a 2 Hz, DHT22 a 0,4 Hz)",
            ["Cenário", "1 nó", "100 nós", "Redução"],
            [["Envio de toda amostra (3 tópicos)", "15.840", "1.584.000 (440 msg/s)", "–"],
@@ -583,19 +591,17 @@ def conteudo(doc, links):
             ["Borda com todos os nós em ALERTA", "372 + eventos", "37.200", "97,7%"],
             ["Gateways → nuvem (4 bacias, resumo a cada 60 s)", "–", "240 + eventos", "99,98%"]],
            [6.6, 2.6, 4.2, 2.6])
-    par(doc, "Com payload médio de 250 bytes já contando cabeçalhos MQTT e TLS, os 100 nós enviando direto em "
-             "estado NORMAL geram cerca de 3,5 milhões de mensagens e 0,9 GB por mês, contra mais de 1,1 bilhão "
-             "de mensagens e cerca de 285 GB no envio de toda amostra. No ThingSpeak, 4 canais de bacia "
-             "atualizados a cada 60 s somam 2,1 milhões de mensagens por ano, dentro do limite de 3 milhões "
-             "do plano gratuito, o que não seria possível com 100 canais a cada 20 s.")
+    par(doc, "Com 250 bytes por mensagem (payload e cabeçalhos), os 100 nós em NORMAL somam cerca de 0,9 GB "
+             "por mês, contra 285 GB no envio de toda amostra. No ThingSpeak, 4 canais de bacia a cada 60 s dão "
+             "2,1 milhões de mensagens por ano, dentro do limite de 3 milhões do plano gratuito.")
 
     # 9 -------------------------------------------------------------
     doc.add_heading("9 Declaração de uso de IA", level=1)
     par(doc, "Usamos o Claude (Anthropic) como apoio em três partes: na escrita inicial do firmware e dos "
              "testes de `borda.h`, na montagem dos diagramas em Mermaid e na revisão do texto deste relatório. "
              "O grupo definiu o problema, o local e os limiares, conferiu cada trecho de código, compilou o "
-             "projeto no PlatformIO, rodou os testes, criou as contas e as credenciais no HiveMQ Cloud e no "
-             "ThingSpeak, testou o circuito no Wokwi, fez os prints e gravou o vídeo. Ajustes feitos pelo grupo "
+             "projeto no PlatformIO, rodou os testes, criou o canal no ThingSpeak, trocou o HiveMQ Cloud pelo "
+             "broker público quando o plano Serverless deixou de existir, testou o circuito no Wokwi, fez os prints e gravou o vídeo. Ajustes feitos pelo grupo "
              "sobre o material de apoio estão registrados no histórico de commits do repositório.")
 
     # 10 ------------------------------------------------------------
@@ -623,8 +629,10 @@ def conteudo(doc, links):
         "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm. Acesso em: 18 nov. 2026.",
         "ESPRESSIF SYSTEMS. **Arduino-ESP32 documentation**: LEDC, WiFi e WiFiClientSecure. 2024. "
         "Disponível em: https://docs.espressif.com/projects/arduino-esp32/en/latest/. Acesso em: 18 nov. 2026.",
-        "HIVEMQ. **HiveMQ Cloud documentation**. Disponível em: https://docs.hivemq.com/hivemq-cloud/. "
-        "Acesso em: 18 nov. 2026.",
+        "HIVEMQ. **HiveMQ Cloud**: aviso de encerramento do plano Serverless exibido no console. Disponível em: "
+        "https://console.hivemq.cloud. Acesso em: 18 nov. 2026.",
+        "HIVEMQ. **Public MQTT Broker** e **MQTT WebSocket Client**. Disponível em: "
+        "https://www.hivemq.com/mqtt/public-mqtt-broker/. Acesso em: 19 nov. 2026.",
         "HIVEMQ. **MQTT Essentials**: Last Will and Testament; retained messages; keep alive. Disponível em: "
         "https://www.hivemq.com/mqtt/. Acesso em: 18 nov. 2026.",
         "MATHWORKS. **ThingSpeak documentation**: write data with REST API; license limits. Disponível em: "
@@ -640,7 +648,7 @@ def conteudo(doc, links):
         texto_formatado(p, ref)
         p.paragraph_format.first_line_indent = Cm(0)
         p.paragraph_format.line_spacing = 1.0
-        p.paragraph_format.space_after = Pt(6)
+        p.paragraph_format.space_after = Pt(4)
         p.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.LEFT
 
 

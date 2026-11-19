@@ -1,6 +1,6 @@
 # Sentinela Pirajuçara
 
-Nó de borda com ESP32 que monitora o nível do córrego Pirajuçara sob uma ponte da região da Av. Eliseu de Almeida (São Paulo), decide localmente o risco de alagamento, avisa quem está passando (LCD, LED RGB e sirene) e fecha a cancela da ponte quando o nível fica crítico, mesmo sem rede. Os dados agregados e os eventos seguem para o HiveMQ Cloud (MQTT com TLS) e para um dashboard no ThingSpeak.
+Nó de borda com ESP32 que monitora o nível do córrego Pirajuçara sob uma ponte da região da Av. Eliseu de Almeida (São Paulo), decide localmente o risco de alagamento, avisa quem está passando (LCD, LED RGB e sirene) e fecha a cancela da ponte quando o nível fica crítico, mesmo sem rede. Os dados agregados e os eventos seguem para o broker público da HiveMQ (MQTT com TLS) e para um dashboard no ThingSpeak.
 
 Projeto da Global Solution 2026.2 (CitizenTech) da disciplina de Edge Computing, Ciência da Computação, FIAP.
 
@@ -16,7 +16,7 @@ Projeto da Global Solution 2026.2 (CitizenTech) da disciplina de Edge Computing,
 - ESP32 DevKit C v4 simulado no Wokwi, firmware em C++ (Arduino) com PlatformIO
 - Sensores: HC-SR04 (nível), potenciômetro simulando pluviômetro, DHT22, botão
 - Atuadores: LCD 16x2 I2C, LED RGB, buzzer, servo (cancela)
-- MQTT: HiveMQ Cloud, porta 8883 com TLS, bibliotecas PubSubClient e ArduinoJson 7
+- MQTT: broker público da HiveMQ (`broker.hivemq.com`, porta 8883 com TLS), bibliotecas PubSubClient e ArduinoJson 7, acompanhamento pelo [MQTT WebSocket Client](https://www.hivemq.com/demos/websocket-client/)
 - Dashboard: ThingSpeak (REST/HTTP)
 - Diagramas em Mermaid; relatório gerado com python-docx e exportado pelo Word
 
@@ -45,9 +45,9 @@ scripts/empacotar.py      gera o .zip do PlatformIO para a entrega
 
 ### 1. Credenciais
 
-1. No HiveMQ Cloud, crie um cluster Serverless e, em *Access Management*, um usuário só para a GS.
+1. O plano gratuito HiveMQ Cloud Serverless foi descontinuado (não aceita novos clusters e os existentes são apagados em 31/12/2026). Por isso o projeto usa o broker público `broker.hivemq.com`, que não precisa de conta. Os comandos são protegidos por um token definido no `secrets.h` (`TOKEN_COMANDO`).
 2. No ThingSpeak, crie um canal com os campos 1 a 8 (nível, chuva, temperatura, umidade, estado, taxa de subida, mensagens evitadas, buffer) e copie a *Write API Key*.
-3. Copie o modelo e preencha:
+3. Copie o modelo e preencha `TOKEN_COMANDO` (um valor só do grupo) e `THINGSPEAK_WRITE_KEY`:
 
 ```bash
 cp firmware/include/secrets.exemplo.h firmware/include/secrets.h
@@ -74,15 +74,19 @@ Depois, no VS Code com a extensão Wokwi Simulator instalada, abra `firmware/dia
 - Gire o potenciômetro acima da metade (> 50 mm/h) com o nó em ATENCAO para ver o alerta antecipado por chuva.
 - Aperte o botão azul para silenciar a sirene.
 - Mude a chave deslizante de posição para derrubar o Wi-Fi; volte para reconectar e ver o reenvio do buffer no monitor serial.
-- No Web Client do HiveMQ, assine `citizentech/gs-gm/pirajucara-eliseu/no01/#` e publique em `.../no01/cmd`:
+- Abra o [MQTT WebSocket Client](https://www.hivemq.com/demos/websocket-client/) com host `broker.hivemq.com`, porta `8884` e **SSL** marcado, e clique em **Connect**.
+- Em **Subscriptions**, assine `citizentech/gs-gm/pirajucara-eliseu/no01/#`.
+- Em **Publish**, use o tópico `citizentech/gs-gm/pirajucara-eliseu/no01/cmd` e mande os comandos com o token do `secrets.h`:
 
 ```json
-{"acao":"cancela","modo":"fechar"}
-{"acao":"silenciar"}
-{"acao":"limiares","atencao":120,"alerta":200,"critico":260}
-{"acao":"intervalo","segundos":15}
-{"acao":"diagnostico"}
+{"acao":"cancela","modo":"fechar","token":"SEU_TOKEN"}
+{"acao":"silenciar","token":"SEU_TOKEN"}
+{"acao":"limiares","atencao":120,"alerta":200,"critico":260,"token":"SEU_TOKEN"}
+{"acao":"intervalo","segundos":15,"token":"SEU_TOKEN"}
+{"acao":"diagnostico","token":"SEU_TOKEN"}
 ```
+
+Um comando sem token, ou com token errado, volta em `.../ack` como `{"ok":false,"msg":"token invalido"}`.
 
 ### 5. Testes da lógica de borda no PC
 

@@ -1,7 +1,7 @@
 // Sentinela Pirajuçara: nó de borda para alerta de alagamento em córrego urbano.
 // ESP32 + HC-SR04 (nível), potenciômetro (pluviômetro simulado), DHT22, botão,
-// LCD I2C, LED RGB, buzzer e servo (cancela da via). Comunicação: HiveMQ Cloud (TLS)
-// e ThingSpeak (HTTP).
+// LCD I2C, LED RGB, buzzer e servo (cancela da via). Comunicação: broker público da HiveMQ
+// (MQTT com TLS) e ThingSpeak (HTTP).
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
@@ -121,7 +121,7 @@ uint32_t instanteUltimaTelemetria = 0;
 
 // Contadores para o diagnóstico e para a análise de escala
 uint32_t totalAmostras = 0, totalPublicadas = 0, totalEvitadas = 0;
-uint32_t reconexoesMqtt = 0, errosUltrassom = 0;
+uint32_t reconexoesMqtt = 0, errosUltrassom = 0, comandosRecusados = 0;
 
 // Rede
 bool quedaSimulada = false;
@@ -305,6 +305,7 @@ void publicarDiagnostico() {
   doc["buffer"] = buffer.tamanho();
   doc["descartadas"] = buffer.descartados();
   doc["reconexoes"] = reconexoesMqtt;
+  doc["cmd_recusados"] = comandosRecusados;
   doc["erros_ultrassom"] = errosUltrassom;
   doc["intervalo_s"] = intervaloJanelaMs / 1000;
   doc["heap"] = ESP.getFreeHeap();
@@ -340,6 +341,15 @@ void aoReceberMensagem(char* topico, byte* payload, unsigned int tamanho) {
     return;
   }
   const char* acao = doc["acao"] | "";
+
+  // O broker público aceita publicação de qualquer cliente; sem o token do grupo
+  // o comando é descartado antes de tocar em qualquer atuador
+  const char* token = doc["token"] | "";
+  if (strcmp(token, TOKEN_COMANDO) != 0) {
+    comandosRecusados++;
+    responder(acao, false, "token invalido");
+    return;
+  }
 
   if (strcmp(acao, "silenciar") == 0) {
     sireneSilenciada = true;
@@ -436,12 +446,17 @@ void gerenciarMqtt() {
   uint32_t agora = millis();
   if ((int32_t)(agora - proximaTentativaMqtt) < 0) return;
 
-  char clientId[40];
-  snprintf(clientId, sizeof(clientId), "%s-%s-%04X", GRUPO, NO_ID, (uint16_t)(ESP.getEfuseMac() & 0xFFFF));
+  // No broker público dois clientes com o mesmo ID se derrubam; o sufixo aleatório evita
+  // colisão com outro ESP32 simulado (no Wokwi todos têm o mesmo MAC)
+  static char clientId[40] = "";
+  if (!clientId[0]) snprintf(clientId, sizeof(clientId), "%s-%s-%08lX", GRUPO, NO_ID, (unsigned long)esp_random());
+  // Sem usuário configurado conecta sem credenciais (broker público); com usuário, autentica
+  const char* usuario = strlen(MQTT_USUARIO) ? MQTT_USUARIO : nullptr;
+  const char* senha = strlen(MQTT_USUARIO) ? MQTT_SENHA : nullptr;
   Serial.printf("[MQTT] conectando em %s:%d...\n", MQTT_HOST, MQTT_PORTA);
 
   // Uma única tentativa por vez; o intervalo entre tentativas cresce até 30 s
-  bool ok = mqtt.connect(clientId, MQTT_USUARIO, MQTT_SENHA,
+  bool ok = mqtt.connect(clientId, usuario, senha,
                          T_STATUS, 1, true, "{\"status\":\"offline\"}", true);
   if (ok) {
     reconexoesMqtt++;
@@ -624,7 +639,7 @@ void setup() {
 
   WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(false);  // a reconexão é feita por gerenciarWifi()
-  clienteTls.setCACert(CA_RAIZ_HIVEMQ);
+  clienteTls.setCACert(CA_RAIZ_BROKER);
   clienteTls.setHandshakeTimeout(8);
   mqtt.setServer(MQTT_HOST, MQTT_PORTA);
   mqtt.setCallback(aoReceberMensagem);

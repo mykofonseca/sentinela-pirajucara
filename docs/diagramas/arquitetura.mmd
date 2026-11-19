@@ -13,11 +13,11 @@ flowchart TB
   end
   subgraph N["Nuvem"]
     direction LR
-    H["HiveMQ Cloud<br/>broker MQTT"] --> C["Cliente da<br/>Defesa Civil"]
+    H["HiveMQ<br/>broker.hivemq.com"] --> C["WebSocket Client /<br/>Defesa Civil"]
     T["ThingSpeak<br/>dashboard"]
   end
   S --> B
   B --> AT
-  B -- "MQTT/TLS 8883, usuário e senha" --> H
+  B -- "MQTT/TLS 8883 + token nos comandos" --> H
   H -- "tópico cmd" --> B
   B -- "HTTP a cada 20 s" --> T

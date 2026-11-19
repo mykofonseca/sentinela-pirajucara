@@ -21,7 +21,7 @@ secrets = FIRMWARE / "include" / "secrets.h"
 if not secrets.exists():
     sys.exit("Falta firmware/include/secrets.h (copie de secrets.exemplo.h e preencha).")
 conteudo = secrets.read_text(encoding="utf-8")
-if "xxxxxxxx" in conteudo or "XXXXXXXX" in conteudo or "senha-do-usuario-gs" in conteudo:
+if "XXXXXXXXXXXXXXXX" in conteudo or "troque-este-token" in conteudo:
     sys.exit("secrets.h ainda tem os valores de exemplo. Preencha antes de empacotar.")
 
 DESTINO.parent.mkdir(exist_ok=True)
