@@ -162,16 +162,43 @@ bool publicarJson(const char* topico, JsonDocument& doc, bool retido = false) {
 }
 
 // ---------------- Atuadores ----------------
+// A API do LEDC mudou no núcleo Arduino-ESP32 3.x (Wokwi web usa 3.x, o PlatformIO usa 2.x):
+// na 3.x as funções recebem o pino; na 2.x, o canal.
+void configurarPwm(int pino, int canal, uint32_t freq, uint8_t bits) {
+#if ESP_ARDUINO_VERSION_MAJOR >= 3
+  ledcAttachChannel(pino, freq, bits, canal);
+#else
+  ledcSetup(canal, freq, bits);
+  ledcAttachPin(pino, canal);
+#endif
+}
+
+void escreverPwm(int pino, int canal, uint32_t duty) {
+#if ESP_ARDUINO_VERSION_MAJOR >= 3
+  ledcWrite(pino, duty);
+#else
+  ledcWrite(canal, duty);
+#endif
+}
+
+void escreverTom(int pino, int canal, uint32_t freq) {
+#if ESP_ARDUINO_VERSION_MAJOR >= 3
+  ledcWriteTone(pino, freq);
+#else
+  ledcWriteTone(canal, freq);
+#endif
+}
+
 void escreverServo(int graus) {
   uint32_t us = 500 + (uint32_t)graus * 1900 / 180;
-  ledcWrite(CANAL_SERVO, us * 65535UL / 20000UL);
+  escreverPwm(PINO_SERVO, CANAL_SERVO, us * 65535UL / 20000UL);
 }
 
 uint32_t freqBuzzerAtual = 0;
 void tocar(uint32_t freq) {
   // Só reprograma o LEDC quando muda, senão o som fica picotado
   if (freq == freqBuzzerAtual) return;
-  ledcWriteTone(CANAL_BUZZER, freq);
+  escreverTom(PINO_BUZZER, CANAL_BUZZER, freq);
   freqBuzzerAtual = freq;
 }
 
@@ -622,12 +649,10 @@ void setup() {
   pinMode(PINO_LED_B, OUTPUT);
   analogReadResolution(12);
 
-  ledcSetup(CANAL_SERVO, 50, 16);
-  ledcAttachPin(PINO_SERVO, CANAL_SERVO);
+  configurarPwm(PINO_SERVO, CANAL_SERVO, 50, 16);
   escreverServo(90);
-  ledcSetup(CANAL_BUZZER, 2000, 10);
-  ledcAttachPin(PINO_BUZZER, CANAL_BUZZER);
-  ledcWriteTone(CANAL_BUZZER, 0);
+  configurarPwm(PINO_BUZZER, CANAL_BUZZER, 2000, 10);
+  escreverTom(PINO_BUZZER, CANAL_BUZZER, 0);
 
   dht.setup(PINO_DHT, DHTesp::DHT22);
   Wire.begin(21, 22);
