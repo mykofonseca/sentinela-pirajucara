@@ -1,0 +1,23 @@
+flowchart TB
+  subgraph S["Sensores"]
+    direction LR
+    US["HC-SR04<br/>nível"] ~~~ PT["Potenciômetro<br/>chuva simulada"] ~~~ DH["DHT22<br/>temp. e umidade"] ~~~ BT["Botão<br/>silenciar"]
+  end
+  subgraph B["Borda: ESP32 (nó no01)"]
+    direction LR
+    F["Média móvel<br/>8 amostras"] --> D["Decisão local<br/>histerese + taxa"] --> A["Agregação 30 s<br/>deadband 2 cm"] --> Q["Fila circular<br/>60 janelas"]
+  end
+  subgraph AT["Atuadores"]
+    direction LR
+    LCD["LCD 16x2"] ~~~ RGB["LED RGB"] ~~~ BZ["Buzzer"] ~~~ SV["Servo (cancela)"]
+  end
+  subgraph N["Nuvem"]
+    direction LR
+    H["HiveMQ Cloud<br/>broker MQTT"] --> C["Cliente da<br/>Defesa Civil"]
+    T["ThingSpeak<br/>dashboard"]
+  end
+  S --> B
+  B --> AT
+  B -- "MQTT/TLS 8883, usuário e senha" --> H
+  H -- "tópico cmd" --> B
+  B -- "HTTP a cada 20 s" --> T

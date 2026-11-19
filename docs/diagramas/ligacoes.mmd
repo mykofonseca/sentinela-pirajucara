@@ -1,0 +1,11 @@
+flowchart TB
+  US["HC-SR04<br/>TRIG GPIO5 · ECHO GPIO18<br/>5V"] --- ESP
+  DH["DHT22<br/>dados GPIO15 · 3V3"] --- ESP
+  PT["Potenciômetro<br/>SIG GPIO34 (ADC1)"] --- ESP
+  BT["Botão silenciar<br/>GPIO4 pull-up"] --- ESP
+  CH["Chave de queda (teste)<br/>GPIO27 entre GND e 3V3"] --- ESP
+  ESP["ESP32 DevKit C v4"]
+  ESP --- LCD["LCD 16x2 I2C (0x27)<br/>SDA GPIO21 · SCL GPIO22"]
+  ESP --- RGB["LED RGB cátodo comum<br/>R25 · G26 · B33 via 220 Ω"]
+  ESP --- BZ["Buzzer<br/>GPIO13 · LEDC canal 6"]
+  ESP --- SV["Servo da cancela<br/>GPIO19 · LEDC canal 4, 50 Hz"]

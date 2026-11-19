@@ -1,0 +1,13 @@
+stateDiagram-v2
+  direction LR
+  [*] --> NORMAL
+  NORMAL --> ATENCAO: nível ≥ 150 cm<br/>ou chuva ≥ 50 mm/h e subida ≥ 4 cm/min
+  ATENCAO --> NORMAL: nível < 140 cm
+  ATENCAO --> ALERTA: nível ≥ 220 cm<br/>ou subida ≥ 4 cm/min<br/>ou chuva ≥ 50 mm/h
+  ALERTA --> ATENCAO: nível < 210 cm<br/>sem antecipação
+  ALERTA --> CRITICO: nível ≥ 280 cm
+  CRITICO --> ALERTA: nível < 270 cm
+  note right of CRITICO
+    cancela fecha, sirene contínua,
+    abertura remota bloqueada
+  end note

@@ -1,0 +1,16 @@
+flowchart LR
+  subgraph B1["Bacia Pirajuçara (25 nós)"]
+    N1["no01"] & N2["no02"] & N3["..."]
+  end
+  subgraph B2["Bacia Aricanduva (25 nós)"]
+    M1["no01"] & M2["..."]
+  end
+  subgraph B3["Outras bacias (50 nós)"]
+    K1["..."]
+  end
+  B1 -- "MQTT local" --> G1["Gateway fog<br/>bacia Pirajuçara"]
+  B2 -- "MQTT local" --> G2["Gateway fog<br/>bacia Aricanduva"]
+  B3 -- "MQTT local" --> G3["Gateways fog<br/>demais bacias"]
+  G1 & G2 & G3 -- "resumo por bacia<br/>+ eventos" --> H["HiveMQ Cloud<br/>citizentech/#"]
+  H --> T["Dashboard<br/>ThingSpeak / Ubidots"]
+  H --> DC["Central da<br/>Defesa Civil"]
