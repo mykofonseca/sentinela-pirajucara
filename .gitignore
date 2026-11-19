@@ -1,6 +1,7 @@
 # build do PlatformIO
 firmware/.pio/
-firmware/.vscode/
+firmware/.vscode/*
+!firmware/.vscode/extensions.json
 # credenciais reais (vão só no .zip de entrega)
 firmware/include/secrets.h
 # pacote gerado

@@ -12,7 +12,7 @@ FIRMWARE = RAIZ / "firmware"
 DESTINO = RAIZ / "entrega" / "GS2026-2_EdgeComputing_SentinelaPirajucara_PlatformIO.zip"
 
 ARQUIVOS = [
-    "platformio.ini", "wokwi.toml", "diagram.json", "libraries.txt",
+    "platformio.ini", "wokwi.toml", "diagram.json", ".vscode/extensions.json",
     "src/main.cpp", "include/borda.h", "include/secrets.h", "include/secrets.exemplo.h",
     "test/test_borda.cpp",
 ]

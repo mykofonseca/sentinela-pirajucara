@@ -430,7 +430,7 @@ def conteudo(doc, links):
 
     # 2 -------------------------------------------------------------
     doc.add_heading("2 Sensores, atuadores e circuito (R2)", level=1)
-    par(doc, "O protótipo roda no Wokwi com um ESP32 DevKit C v4. São quatro entradas e quatro saídas, cada uma "
+    par(doc, "O protótipo roda no Wokwi para VS Code, com PlatformIO, num ESP32 DevKit C v4. São quatro entradas e quatro saídas, cada uma "
              "ligada a uma parte do problema. O potenciômetro **simula** um pluviômetro de báscula: 0 a 4095 do "
              "ADC vira 0 a 100 mm/h. A chave deslizante não conta como sensor; ela existe só para demonstrar a "
              "queda de rede no vídeo.")
@@ -606,7 +606,13 @@ def conteudo(doc, links):
 
     # 10 ------------------------------------------------------------
     doc.add_heading("10 Links do projeto e do vídeo", level=1)
-    itens = [("Projeto no Wokwi", "wokwi"), ("Vídeo de demonstração (YouTube, não listado)", "video"),
+    p = doc.add_paragraph()
+    p.paragraph_format.first_line_indent = Cm(0)
+    p.paragraph_format.space_after = Pt(2)
+    p.add_run("Código-fonte: ").bold = True
+    texto_formatado(p, "entregue como .zip do projeto PlatformIO (`GS2026-2_EdgeComputing_SentinelaPirajucara_"
+                       "PlatformIO.zip`), simulado com a extensão Wokwi para VS Code.")
+    itens = [("Vídeo de demonstração (YouTube, não listado)", "video"),
              ("Repositório do código-fonte", "repositorio")]
     for rotulo, chave in itens:
         p = doc.add_paragraph()

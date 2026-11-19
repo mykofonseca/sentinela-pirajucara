@@ -162,8 +162,8 @@ bool publicarJson(const char* topico, JsonDocument& doc, bool retido = false) {
 }
 
 // ---------------- Atuadores ----------------
-// A API do LEDC mudou no núcleo Arduino-ESP32 3.x (Wokwi web usa 3.x, o PlatformIO usa 2.x):
-// na 3.x as funções recebem o pino; na 2.x, o canal.
+// A API do LEDC mudou no núcleo Arduino-ESP32 3.x: na 3.x as funções recebem o pino,
+// na 2.x (usada pelo platformio.ini), o canal. Assim o código compila nas duas.
 void configurarPwm(int pino, int canal, uint32_t freq, uint8_t bits) {
 #if ESP_ARDUINO_VERSION_MAJOR >= 3
   ledcAttachChannel(pino, freq, bits, canal);

@@ -13,7 +13,7 @@ Projeto da Global Solution 2026.2 (CitizenTech) da disciplina de Edge Computing,
 
 ## Tecnologias
 
-- ESP32 DevKit C v4 simulado no Wokwi, firmware em C++ (Arduino) com PlatformIO
+- ESP32 DevKit C v4 simulado no VS Code com as extensões PlatformIO IDE e Wokwi Simulator, firmware em C++ (Arduino)
 - Sensores: HC-SR04 (nível), potenciômetro simulando pluviômetro, DHT22, botão
 - Atuadores: LCD 16x2 I2C, LED RGB, buzzer, servo (cancela)
 - MQTT: broker público da HiveMQ (`broker.hivemq.com`, porta 8883 com TLS), bibliotecas PubSubClient e ArduinoJson 7, acompanhamento pelo [MQTT WebSocket Client](https://www.hivemq.com/demos/websocket-client/)
@@ -30,12 +30,12 @@ firmware/                 projeto PlatformIO
   test/test_borda.cpp     testes da lógica de borda que rodam no PC
   diagram.json            circuito do Wokwi
   wokwi.toml              liga o Wokwi ao firmware compilado
-  libraries.txt           bibliotecas para o Wokwi web
+  .vscode/extensions.json extensões recomendadas (PlatformIO e Wokwi)
 docs/
   diagramas/*.mmd         fontes Mermaid
   img/*.png               diagramas exportados
   prints/                 capturas de tela usadas no relatório
-  links.json              links do Wokwi, do vídeo e do repositório
+  links.json              links do vídeo e do repositório
   gerar_relatorio.py      gera o DOCX e o PDF do relatório
   Relatorio_GS_EdgeComputing_SentinelaPirajucara.pdf
 scripts/empacotar.py      gera o .zip do PlatformIO para a entrega
@@ -53,20 +53,19 @@ scripts/empacotar.py      gera o .zip do PlatformIO para a entrega
 cp firmware/include/secrets.exemplo.h firmware/include/secrets.h
 ```
 
-### 2. Compilar e simular (VS Code + PlatformIO + Wokwi)
+### 2. Preparar o VS Code
+
+1. Instale as extensões **PlatformIO IDE** e **Wokwi Simulator** (o VS Code sugere as duas ao abrir a pasta, por causa do `.vscode/extensions.json`).
+2. Abra a pasta **`firmware`** em *File → Open Folder*. Ela precisa ser a raiz do workspace, porque é ali que ficam o `platformio.ini` e o `wokwi.toml`.
+3. Ative a licença gratuita do Wokwi: `F1` → **Wokwi: Request a New License** e confirme no navegador.
+
+### 3. Compilar e simular
 
 ```bash
-cd firmware
 pio run
 ```
 
-Depois, no VS Code com a extensão Wokwi Simulator instalada, abra `firmware/diagram.json` e use **Wokwi: Start Simulator**. O `wokwi.toml` aponta para `.pio/build/esp32dev/firmware.bin`.
-
-### 3. Alternativa: Wokwi no navegador
-
-1. Crie um projeto ESP32 em https://wokwi.com.
-2. Cole `src/main.cpp` em `sketch.ino` e crie as abas `borda.h` e `secrets.h` com o conteúdo dos arquivos de `include/`.
-3. Substitua o `diagram.json` pelo do repositório e adicione as bibliotecas de `libraries.txt` pelo Library Manager.
+(ou o botão ✓ *Build* na barra do PlatformIO). Depois, `F1` → **Wokwi: Start Simulator**. O `wokwi.toml` aponta para `.pio/build/esp32dev/firmware.bin`, então toda alteração no código precisa de um novo build antes de reiniciar a simulação. O monitor serial aparece no painel inferior do VS Code e o circuito no `diagram.json`.
 
 ### 4. Testar no simulador
 
