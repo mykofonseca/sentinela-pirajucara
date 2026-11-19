@@ -1,0 +1,12 @@
+# build do PlatformIO
+firmware/.pio/
+firmware/.vscode/
+# credenciais reais (vão só no .zip de entrega)
+firmware/include/secrets.h
+# pacote gerado
+entrega/
+# temporários
+__pycache__/
+docs/~$*.docx
+# enunciado da disciplina
+GS_2026.2_*.docx
