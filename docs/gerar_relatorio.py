@@ -610,8 +610,7 @@ def conteudo(doc, links):
     p.paragraph_format.first_line_indent = Cm(0)
     p.paragraph_format.space_after = Pt(2)
     p.add_run("Código-fonte: ").bold = True
-    texto_formatado(p, "entregue como .zip do projeto PlatformIO (`GS2026-2_EdgeComputing_SentinelaPirajucara_"
-                       "PlatformIO.zip`), simulado com a extensão Wokwi para VS Code.")
+    p.add_run(".zip do projeto PlatformIO, simulado com o Wokwi para VS Code.")
     itens = [("Vídeo de demonstração (YouTube, não listado)", "video"),
              ("Repositório do código-fonte", "repositorio")]
     for rotulo, chave in itens:
@@ -646,8 +645,7 @@ def conteudo(doc, links):
         "O'LEARY, N. **PubSubClient**: a client library for MQTT messaging. Versão 2.8. Disponível em: "
         "https://github.com/knolleary/pubsubclient. Acesso em: 18 nov. 2026.",
         "BLANCHON, B. **ArduinoJson**. Versão 7. Disponível em: https://arduinojson.org/. Acesso em: 18 nov. 2026.",
-        "WOKWI. **Wokwi documentation**: ESP32 simulation, WiFi networking e diagram.json. Disponível em: "
-        "https://docs.wokwi.com/. Acesso em: 18 nov. 2026.",
+        "WOKWI. **Wokwi for VS Code**. Disponível em: https://docs.wokwi.com/. Acesso em: 19 nov. 2026.",
     ]
     for ref in refs:
         p = doc.add_paragraph()
