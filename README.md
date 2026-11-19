@@ -4,6 +4,12 @@ Nó de borda com ESP32 que monitora o nível do córrego Pirajuçara sob uma pon
 
 Projeto da Global Solution 2026.2 (CitizenTech) da disciplina de Edge Computing, Ciência da Computação, FIAP.
 
+## Links
+
+- Vídeo de demonstração (YouTube, não listado): *em breve*
+- Dashboard público no ThingSpeak: https://thingspeak.mathworks.com/channels/3586730
+- Relatório técnico: [docs/Relatorio_GS_EdgeComputing_SentinelaPirajucara.pdf](docs/Relatorio_GS_EdgeComputing_SentinelaPirajucara.pdf)
+
 ## Integrantes
 
 | Nome | RM | E-mail |
@@ -67,12 +73,18 @@ pio run
 
 (ou o botão ✓ *Build* na barra do PlatformIO). Depois, `F1` → **Wokwi: Start Simulator**. O `wokwi.toml` aponta para `.pio/build/esp32dev/firmware.bin`, então toda alteração no código precisa de um novo build antes de reiniciar a simulação. O monitor serial aparece no painel inferior do VS Code e o circuito no `diagram.json`.
 
+> **Atenção:** o Wokwi pausa a simulação quando a aba dele fica escondida. Se você trocar para o navegador, o ESP32 congela, o broker publica `{"status":"offline"}` (LWT) e os comandos ficam sem `ack`. Deixe o VS Code e o navegador lado a lado.
+
 ### 4. Testar no simulador
 
-- Arraste a distância do HC-SR04 para baixo: 200 cm → nível 150 cm (ATENCAO), 130 cm → 220 cm (ALERTA), 70 cm → 280 cm (CRITICO, cancela fecha).
+- Com a simulação rodando, clique no HC-SR04 (o sensor azul com dois "olhos") e arraste a distância para baixo. O nível é `350 − distância`. Ele começa em 400 cm, que dá nível 0 (NORMAL).
+  - 200 cm → nível 150 cm (ATENCAO)
+  - 130 cm → nível 220 cm (ALERTA)
+  - 50 cm → nível 300 cm (CRITICO, LCD mostra "VIA FECHADA" e a cancela fecha). O limite é 280 cm; com 70 cm a leitura fica em ~279,7 cm e o nó permanece em ALERTA.
+  - O firmware faz média antes de decidir, então espere alguns segundos em cada posição.
 - Gire o potenciômetro acima da metade (> 50 mm/h) com o nó em ATENCAO para ver o alerta antecipado por chuva.
 - Aperte o botão azul para silenciar a sirene.
-- Mude a chave deslizante de posição para derrubar o Wi-Fi; volte para reconectar e ver o reenvio do buffer no monitor serial.
+- Mude a chave deslizante (ao lado do botão azul, pino 27) de posição para simular queda de rede. O LCD mostra `OFFLINE Buf:N`; como cada janela dura 30 s, deixe pelo menos 1 minuto para acumular. Volte a chave: o serial mostra `[BUFFER] reenvio concluido` e as mensagens chegam no broker com `"buffer":true`.
 - Abra o [MQTT WebSocket Client](https://www.hivemq.com/demos/websocket-client/) com host `broker.hivemq.com`, porta `8884` e **SSL** marcado, e clique em **Connect**.
 - Em **Subscriptions**, assine `citizentech/gs-gm/pirajucara-eliseu/no01/#`.
 - Em **Publish**, use o tópico `citizentech/gs-gm/pirajucara-eliseu/no01/cmd` e mande os comandos com o token do `secrets.h`:
@@ -85,7 +97,9 @@ pio run
 {"acao":"diagnostico","token":"SEU_TOKEN"}
 ```
 
-Um comando sem token, ou com token errado, volta em `.../ack` como `{"ok":false,"msg":"token invalido"}`.
+Um comando aceito volta em `.../ack` como `{"acao":"cancela","ok":true,"msg":"fechar"}`. Um comando sem token, ou com token errado, volta como `{"ok":false,"msg":"token invalido"}`. Com o nó em CRITICO, `"modo":"abrir"` é recusado com `nivel critico, abertura bloqueada` (trava de segurança na borda); `"modo":"auto"` devolve a cancela ao controle automático.
+
+No ThingSpeak o envio é a cada 20 s (o plano gratuito aceita 1 a cada 15 s), então espere 1 a 2 minutos e atualize a página do canal.
 
 ### 5. Testes da lógica de borda no PC
 
@@ -141,10 +155,18 @@ Máquina de estados da decisão local:
 
 ![Estados](docs/img/estados.png)
 
-Circuito no Wokwi:
+Circuito no Wokwi com o nó em CRITICO (HC-SR04 em 50 cm, via fechada):
 
 ![Circuito no Wokwi](docs/prints/wokwi_circuito.png)
 
-Dashboard no ThingSpeak:
+Mensagens no MQTT WebSocket Client: nó online, comando `fechar` com token, `ack` e novo estado com a cancela fechada:
+
+![Mensagens MQTT](docs/prints/hivemq_mensagens.png)
+
+Dashboard no ThingSpeak recebendo o nível de 278,8 cm publicado pelo nó:
 
 ![Dashboard](docs/prints/dashboard_thingspeak.png)
+
+## Observações dos testes
+
+- No Wokwi, o envio HTTP ao ThingSpeak bloqueia o loop por alguns instantes e a simulação roda abaixo da velocidade real, então o MQTT às vezes reconecta logo depois de um `[THINGSPEAK] HTTP 200`. A decisão local continua funcionando e nenhum dado se perde: as janelas passam pelo buffer e o serial mostra `Buffer pendente: 0` e `reenvio concluido`.
