@@ -44,7 +44,7 @@ docs/
   links.json              links do vídeo e do repositório
   gerar_relatorio.py      gera o DOCX e o PDF do relatório
   Relatorio_GS_EdgeComputing_SentinelaPirajucara.pdf
-scripts/empacotar.py      gera o .zip do PlatformIO para a entrega
+scripts/empacotar.py      gera os .zip de entrega (projeto e pacote completo)
 ```
 
 ## Como executar
@@ -127,7 +127,7 @@ Cenario de enchente (2 h)
 ```bash
 pip install python-docx pygments pillow pywin32
 python docs/gerar_relatorio.py      # precisa do Microsoft Word para atualizar o sumário e exportar o PDF
-python scripts/empacotar.py         # gera entrega/...PlatformIO.zip com o secrets.h preenchido
+python scripts/empacotar.py         # gera entrega/...PlatformIO.zip e entrega/...Entrega.zip (relatório + projeto + imagens), com o secrets.h preenchido
 ```
 
 ## Tópicos MQTT
