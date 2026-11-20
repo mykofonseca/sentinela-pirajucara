@@ -11,3 +11,5 @@ __pycache__/
 docs/~$*.docx
 # enunciado da disciplina
 GS_2026.2_*.docx
+# gravações brutas do vídeo (o vídeo final está no YouTube)
+docs/media/

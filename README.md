@@ -6,7 +6,7 @@ Projeto da Global Solution 2026.2 (CitizenTech) da disciplina de Edge Computing,
 
 ## Links
 
-- Vídeo de demonstração (YouTube, não listado): *em breve*
+- Vídeo de demonstração (YouTube, não listado): https://youtu.be/ENHdPyjKutI
 - Dashboard público no ThingSpeak: https://thingspeak.mathworks.com/channels/3586730
 - Relatório técnico: [docs/Relatorio_GS_EdgeComputing_SentinelaPirajucara.pdf](docs/Relatorio_GS_EdgeComputing_SentinelaPirajucara.pdf)
 
